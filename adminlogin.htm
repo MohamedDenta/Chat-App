@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head></head>
+
+<body>
+    <h1>Admin login</h1>
+    <form method="post" action="getAllmessages">
+        <div class="container">
+            <label for="username"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" name="usernam" required>
+
+            <label for="email"><b>Email</b></label>
+            <input type="email" placeholder="Enter email" name="email" required>
+
+            <button type="submit">Login</button>
+        </div>
+    </form>
+
+
+    <script type="text/javascript">
+        //  var sock = null;
+        var wsuri = "ws://localhost:8000/adminlogin"; // <-- note new path
+        var sock = new WebSocket(wsuri)
+        window.onload = function() {
+
+            console.log("onload");
+
+            // sock = new WebSocket(wsuri);
+
+            sock.onopen = function() {
+                console.log("connected to " + wsuri);
+            }
+
+            sock.onclose = function(e) {
+                console.log("connection closed (" + e.code + ")");
+            }
+
+            sock.onmessage = function(e) {
+                console.log("message received: " + e.data);
+            }
+        };
+
+        function send() {
+            var username = document.getElementById('username').value;
+            var email = document.getElementById('email').value;
+            var msg = {
+                username: username,
+                email: email,
+            }
+            console.log(JSON.stringify(msg));
+            sock.send(JSON.stringify(msg));
+            document.getElementById('username').value = '';
+            document.getElementById('email').value = '';
+            socket.close()
+        };
+    </script>
+</body>
+
+</html>

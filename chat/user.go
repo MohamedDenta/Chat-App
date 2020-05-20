@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/MohamedDenta/Chat-App/db"
 	"github.com/gorilla/websocket"
 )
 
 const channelBufSize = 100
 
-var maxId int = 0
+var CurrentUser User
 
 type User struct {
-	id              int
-	conn            *websocket.Conn
-	server          *Server
-	outgoingMessage chan *Message
-	doneCh          chan bool
+	Id              string
+	Name            string
+	Con             *websocket.Conn
+	Servr           *Server
+	OutgoingMessage chan *Message
+	DoneCh          chan bool
 }
 
 func NewUser(conn *websocket.Conn, server *Server) *User {
@@ -28,34 +30,41 @@ func NewUser(conn *websocket.Conn, server *Server) *User {
 		panic(" Server cannot be nil")
 	}
 
-	maxId++
 	ch := make(chan *Message, channelBufSize)
 	doneCh := make(chan bool)
 	log.Println("Done creating new User")
-	return &User{maxId, conn, server, ch, doneCh}
+	return &User{"1", "", conn, server, ch, doneCh}
 }
 
 func (user *User) Conn() *websocket.Conn {
-	return user.conn
+	return user.Con
 }
 
 func (user *User) Write(message *Message) {
 	select {
-	case user.outgoingMessage <- message:
+	case user.OutgoingMessage <- message:
 	default:
-		user.server.RemoveUser(user)
-		err := fmt.Errorf("User %d is disconnected.", user.id)
-		user.server.Err(err)
+		user.Servr.RemoveUser(user)
+		err := fmt.Errorf("User %d is disconnected.", user.Id)
+		user.Servr.Err(err)
 	}
 }
 
 func (user *User) Done() {
-	user.doneCh <- true
+	user.DoneCh <- true
 }
 
 func (user *User) Listen() {
 	go user.listenWrite()
 	user.listenRead()
+}
+
+func (user *User) SaveDB() {
+
+	if b := db.AddUser(db.UserDB{Id: user.Id, Name: user.Name}); !b {
+		log.Println("error in save user to db ")
+		return
+	}
 }
 
 func (user *User) listenWrite() {
@@ -64,15 +73,15 @@ func (user *User) listenWrite() {
 	for {
 		select {
 		//send message to user
-		case msg := <-user.outgoingMessage:
-			log.Println("send in listenWrite for user :", user.id, msg)
-			user.conn.WriteJSON(&msg)
+		case msg := <-user.OutgoingMessage:
+			log.Println("send in listenWrite for user :", user.Id, msg)
+			user.Con.WriteJSON(&msg)
 
 			// receive done request
-		case <-user.doneCh:
+		case <-user.DoneCh:
 			log.Println("Done Channel for user:")
-			user.server.RemoveUser(user)
-			user.doneCh <- true
+			user.Servr.RemoveUser(user)
+			user.DoneCh <- true
 			return
 		}
 	}
@@ -83,21 +92,21 @@ func (user *User) listenRead() {
 	for {
 		select {
 		// receive Done request
-		case <-user.doneCh:
-			user.server.RemoveUser(user)
-			user.doneCh <- true
+		case <-user.DoneCh:
+			user.Servr.RemoveUser(user)
+			user.DoneCh <- true
 			return
 			// read data from websocket connection
 		default:
 			var messageObject Message
-			err := user.conn.ReadJSON(&messageObject)
+			err := user.Con.ReadJSON(&messageObject)
 
 			if err != nil {
-				user.doneCh <- true
+				user.DoneCh <- true
 				log.Println("Error while reading JSON from websocket ", err.Error())
-				user.server.Err(err)
+				user.Servr.Err(err)
 			} else {
-				user.server.ProcessNewIncomingMessage(&messageObject)
+				user.Servr.ProcessNewIncomingMessage(&messageObject)
 			}
 		}
 	}

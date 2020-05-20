@@ -1,2 +1,46 @@
-2020/05/18 11:01:51 The serverHost  localhost:8000
-2020/05/18 11:01:51 Server Listening ... 
+2020/05/20 11:07:38 The serverHost  localhost:8000
+2020/05/20 11:07:38 Server Listening ... 
+2020/05/20 11:07:48 Handling chat request 
+2020/05/20 11:07:48 Message retrieved when add user recieved  at  sent 
+2020/05/20 11:07:48 Error while reading JSON from websocket  websocket: close 1006 (abnormal closure): unexpected EOF
+2020/05/20 11:07:48 Done creating new User
+2020/05/20 11:07:48 going to add user &{1  0xc0001d82c0 0xc0000a4140 0xc0000642a0 0xc000022240}
+2020/05/20 11:07:48 In AddUser
+2020/05/20 11:07:48 user added successfully
+2020/05/20 11:07:48 In ProcessNewIncomingMessage   at  sent 
+2020/05/20 11:07:48 added a new User
+2020/05/20 11:07:48 Now  1  users are connected to chat room
+2020/05/20 11:07:48 added user to database 
+2020/05/20 11:07:48 Message save to data base   at  sent 
+2020/05/20 11:07:48 added msg to database 
+2020/05/20 11:07:48 Listening to Read to client
+2020/05/20 11:07:48 Listening to write to client
+2020/05/20 11:07:48 Done Channel for user:
+2020/05/20 11:07:48 Removing user
+2020/05/20 11:07:48 Removing user from chat room
+2020/05/20 11:07:48 Error while reading JSON from websocket  websocket: close 1006 (abnormal closure): unexpected EOF
+2020/05/20 11:07:48 Removing user
+2020/05/20 11:07:48 Error :  websocket: close 1006 (abnormal closure): unexpected EOF
+2020/05/20 11:07:48 Removing user from chat room
+2020/05/20 11:08:06 Handling chat request 
+2020/05/20 11:08:06 Message retrieved when add user recieved  at  sent 
+2020/05/20 11:08:06 Error while reading JSON from websocket  websocket: close 1006 (abnormal closure): unexpected EOF
+2020/05/20 11:08:06 Done creating new User
+2020/05/20 11:08:06 going to add user &{1  0xc0001402c0 0xc0000a4140 0xc0001bc300 0xc0001cc1e0}
+2020/05/20 11:08:06 In AddUser
+2020/05/20 11:08:06 user added successfully
+2020/05/20 11:08:06 In ProcessNewIncomingMessage   at  sent 
+2020/05/20 11:08:06 added a new User
+2020/05/20 11:08:06 Now  1  users are connected to chat room
+2020/05/20 11:08:06 added user to database 
+2020/05/20 11:08:06 Message save to data base   at  sent 
+2020/05/20 11:08:06 Listening to Read to client
+2020/05/20 11:08:06 Listening to write to client
+2020/05/20 11:08:06 Done Channel for user:
+2020/05/20 11:08:06 Removing user
+2020/05/20 11:08:06 Error while reading JSON from websocket  websocket: close 1006 (abnormal closure): unexpected EOF
+2020/05/20 11:08:06 added msg to database 
+2020/05/20 11:08:06 Error :  websocket: close 1006 (abnormal closure): unexpected EOF
+2020/05/20 11:08:06 Removing user from chat room
+2020/05/20 11:08:06 Removing user
+2020/05/20 11:08:06 Removing user from chat room

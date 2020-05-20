@@ -4,7 +4,7 @@ import "fmt"
 
 // Message message format structure
 type Message struct {
-	UserName  string `json:"userName"`
+	UserName  string `json:"userName"` // Email
 	Body      string `json:"body"`
 	Timestamp string `json:"timestamp"`
 }

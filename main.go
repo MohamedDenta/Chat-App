@@ -32,13 +32,14 @@ func main() {
 	Init()
 	// websoket server
 	server := chat.NewServer()
+	//fmt.Println(len(server.Messages))
 	go server.Listen()
-	http.HandleFunc("/messages", handleHomePage)
+	// http.HandleFunc("/messages", handleHomePage)
 	http.HandleFunc("/", handleHomePage)
 
 	http.ListenAndServe(serverHostName, nil)
 }
 
 func handleHomePage(responseWriter http.ResponseWriter, request *http.Request) {
-	http.ServeFile(responseWriter, request, "chat.html")
+	http.ServeFile(responseWriter, request, "clientlogin.htm")
 }

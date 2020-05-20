@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/MohamedDenta/Chat-App/db"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,7 +15,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type Server struct {
-	connectedUsers     map[int]*User
+	connectedUsers     map[string]*User
 	Messages           []*Message `json:messages`
 	addUser            chan *User
 	removeUser         chan *User
@@ -25,7 +26,7 @@ type Server struct {
 
 func NewServer() *Server {
 	Messages := []*Message{}
-	connectedUsers := make(map[int]*User)
+	connectedUsers := make(map[string]*User)
 	addUser := make(chan *User)
 	removeUser := make(chan *User)
 	newIncomingMessage := make(chan *Message)
@@ -84,20 +85,23 @@ func (server *Server) Listen() {
 	log.Println("Server Listening ... ")
 	http.HandleFunc("/chat", server.handleChat)
 	http.HandleFunc("/getAllMessages", server.handleGetAllMessages)
-
+	http.HandleFunc("/clientlogin", server.clientLogin)
+	http.HandleFunc("/adminlogin", server.adminLogin)
 	for {
 		select {
 		case user := <-server.addUser:
 			log.Println("added a new User")
-			server.connectedUsers[user.id] = user
+			server.connectedUsers[user.Id] = user
 			log.Println("Now ", len(server.connectedUsers), " users are connected to chat room")
-			server.sendPastMessages(user)
-		case user := <-server.removeUser:
+			//server.sendPastMessages(user)
+			user.SaveDB()
+		case _ = <-server.removeUser:
 			log.Println("Removing user from chat room")
-			delete(server.connectedUsers, user.id)
+			//delete(server.connectedUsers, user.Id)
 		case msg := <-server.newIncomingMessage:
 			server.Messages = append(server.Messages, msg)
-			server.sendAll(msg) // -- incase of chat room
+			saveMsg(msg)
+			// server.sendAll(msg) // -- incase of chat room
 		case err := <-server.errorChannel:
 			log.Println("Error : ", err)
 		case <-server.doneCh: // to stop server
@@ -106,7 +110,13 @@ func (server *Server) Listen() {
 	}
 }
 
+func saveMsg(msg *Message) {
+	log.Println("Message save to data base ", msg.String())
+	db.AddMsg(db.MessageDB{UserName: msg.UserName, Body: msg.Body, Timestamp: msg.Timestamp})
+}
 func (server *Server) handleChat(responseWrite http.ResponseWriter, request *http.Request) {
+	http.ServeFile(responseWrite, request, "chat.htm")
+
 	log.Println("Handling chat request ")
 	var messageObject Message
 	conn, _ := upgrader.Upgrade(responseWrite, request, nil)
@@ -130,5 +140,48 @@ func (server *Server) handleChat(responseWrite http.ResponseWriter, request *htt
 
 func (server *Server) handleGetAllMessages(responseWriter http.ResponseWriter, request *http.Request) {
 
-	json.NewEncoder(responseWriter).Encode(server)
+	json.NewEncoder(responseWriter).Encode(db.GetAllMsg())
+}
+
+func (server *Server) clientLogin(responseWrite http.ResponseWriter, request *http.Request) {
+
+	log.Println(" client login ")
+	var userObject db.UserDB
+	conn, _ := upgrader.Upgrade(responseWrite, request, nil)
+
+	err := conn.ReadJSON(&userObject)
+	log.Println("user retrieved when add user recieved", &userObject)
+
+	if err != nil {
+		log.Println("Error while reading JSON from websocket ", err.Error())
+	}
+	user := NewUser(conn, server)
+
+	log.Println("going to add user", user)
+	server.AddUser(user)
+
+	log.Println("user added successfully")
+	//server.ProcessNewIncomingMessage(&us)
+	user.Listen()
+}
+func (server *Server) adminLogin(responseWrite http.ResponseWriter, request *http.Request) {
+
+	log.Println(" admin login ")
+	var userObject db.UserDB
+	conn, _ := upgrader.Upgrade(responseWrite, request, nil)
+
+	err := conn.ReadJSON(&userObject)
+	log.Println("user retrieved when add user recieved", &userObject)
+
+	if err != nil {
+		log.Println("Error while reading JSON from websocket ", err.Error())
+	}
+	user := NewUser(conn, server)
+
+	log.Println("going to add user", user)
+	server.AddUser(user)
+
+	log.Println("user added successfully")
+	//server.ProcessNewIncomingMessage(&us)
+	user.Listen()
 }
